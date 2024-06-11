@@ -9692,7 +9692,7 @@ async function cleanup() {
     core.info('Wait 10s for job steps status to propagate to GitHub API');
     await wait(10 * 1000);
     // retrieve states
-    const jobId = new Number(core.getState('job-id-num'));
+    const jobId = Number(core.getState('job-id-num'));
     const sha = core.getState('commit-status-sha');
     const commitStatusContext = core.getState('commit-status-context');
     // bail out if states are not found
