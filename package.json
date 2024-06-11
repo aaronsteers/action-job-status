@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "bundle": "npm run build:index.ts && npm run build:cleanup.ts",
+    "build:index.ts": "npx ncc build src/index.ts --out dist/index --source-map",
+    "build:cleanup.ts": "npx ncc build src/cleanup.ts --out dist/cleanup --source-map",
     "format:write": "prettier --write **/*.ts",
     "format:check": "prettier --check **/*.ts",
-    "lint": "eslint src/**/*.ts",
-    "package": "ncc build --source-map",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "lint": "eslint src/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "@types/node": "^20.14.2",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
+    "@vercel/ncc": "^0.38.1",
     "eslint": "^8.57.0",
     "eslint-plugin-github": "^5.0.1",
     "eslint-plugin-prettier": "^5.1.3",
