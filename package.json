@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "bundle": "npm run build:index.ts && npm run build:cleanup.ts",
+    "build": "npm run build:index.ts && npm run build:cleanup.ts",
     "build:index.ts": "npx ncc build src/index.ts --out dist/index --source-map",
     "build:cleanup.ts": "npx ncc build src/cleanup.ts --out dist/cleanup --source-map",
     "format:write": "prettier --write **/*.ts",
