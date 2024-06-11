@@ -9731,12 +9731,7 @@ async function cleanup() {
     core.debug(JSON.stringify(createCommitStatus, null, 2));
 }
 // entrypoint
-try {
-    cleanup();
-}
-catch (error) {
-    core.warning(error?.message ?? `Error: ${error}`);
-}
+cleanup().catch(error => core.warning(error.message ?? `Error: ${error}`));
 
 
 /***/ }),

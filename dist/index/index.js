@@ -9718,12 +9718,7 @@ async function startup() {
     core.saveState('commit-status-context', commitStatusContext);
 }
 // entrypoint
-try {
-    startup();
-}
-catch (error) {
-    core.setFailed(error?.message ?? `Error: ${error}`);
-}
+startup().catch(error => core.setFailed(error.message ?? `Error: ${error}`));
 
 
 /***/ }),
