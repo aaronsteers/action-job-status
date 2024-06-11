@@ -1,20 +1,13 @@
-name: 'workflow_run status'
-description: 'Associate workflow_run status with the base commit of workflow_run triggered event'
-author: 'haya14busa'
+name: GitHub workflow job status
+description: Report the job status of a GitHub workflow run to the associated commit
+author: ushuz
 inputs:
+  commit_sha:
+    description: The commit SHA to report the status to
   github_token:
-    description: 'GITHUB_TOKEN'
-    default: '${{ github.token }}'
-  requested_as_pending:
-    description: 'handle requested action type as pending'
-    default: true
-    required: false
-  matrix_name:
-    description: 'current matrix name'
-    default: ''
-    required: false
+    description: GitHub token
+    default: ${{ github.token }}
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
-  post: 'dist/index.js'
-  post-if: 'always()'
+  using: node20
+  main: dist/index.js
+  post: dist/cleanup.js
