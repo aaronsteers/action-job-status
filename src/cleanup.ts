@@ -63,8 +63,4 @@ async function cleanup(): Promise<void> {
 }
 
 // entrypoint
-try {
-  cleanup()
-} catch (error) {
-  core.warning((error as Error)?.message ?? `Error: ${error}`)
-}
+cleanup().catch(error => core.warning((error as Error).message ?? `Error: ${error}`))

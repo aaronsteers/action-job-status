@@ -47,8 +47,4 @@ async function startup(): Promise<void> {
 }
 
 // entrypoint
-try {
-  startup()
-} catch (error) {
-  core.setFailed((error as Error)?.message ?? `Error: ${error}`)
-}
+startup().catch(error => core.setFailed((error as Error).message ?? `Error: ${error}`))
