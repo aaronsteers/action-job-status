@@ -25,7 +25,32 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github = __importStar(require("@actions/github"));
-async function startup() {
+async function wait(ms) {
+    new Promise(resolve => setTimeout(resolve, ms));
+}
+// calculate conclusion based on steps
+// `job.conclusion` cannot be used because this action itself is one step of the job
+// `job.conclusion` is always null while this action is executing
+function getJobStatus(job) {
+    if (job.steps?.find(step => step.conclusion === 'failure'))
+        return 'failure';
+    if (job.steps?.find(step => step.conclusion === 'cancelled'))
+        return 'error';
+    return 'success';
+}
+async function cleanup() {
+    // wait for propagation
+    core.info('Wait 10s for job steps status to propagate to GitHub API');
+    await wait(10 * 1000);
+    // retrieve states
+    const jobId = new Number(core.getState('job-id-num'));
+    const sha = core.getState('commit-status-sha');
+    const commitStatusContext = core.getState('commit-status-context');
+    // bail out if states are not found
+    if (!jobId || !sha || !commitStatusContext) {
+        throw new Error('Error: Cannot find saved states');
+    }
+    // start cleanup
     const context = github.context;
     core.debug(JSON.stringify(context, null, 2));
     // list jobs for the workflow run
@@ -39,21 +64,13 @@ async function startup() {
     });
     core.debug(JSON.stringify(jobs, null, 2));
     // find the current job
-    const job = jobs.data.jobs.find(j => j.name === context.job);
+    const job = jobs.data.jobs.find(j => j.id === jobId);
     // throw error if the job is not found
     if (!job) {
-        throw new Error(`Error: Cannot find job: ${context.job}`);
+        throw new Error(`Error: Cannot find job: ${jobId}`);
     }
-    // set commit status to pending
-    const sha = core.getInput('commit_sha') ||
-        context.payload.workflow_run?.head_sha ||
-        context.payload.commit?.sha ||
-        context.sha;
-    const event = context.payload.workflow_run
-        ? ` (${context.payload.workflow_run.event} → ${context.eventName})`
-        : ``;
-    const commitStatusContext = `${context.workflow} / ${job.name}${event}`;
-    const state = 'pending';
+    // set commit status
+    const state = getJobStatus(job);
     const createCommitStatus = await octokit.rest.repos.createCommitStatus({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -63,16 +80,12 @@ async function startup() {
         target_url: job.html_url ?? undefined
     });
     core.debug(JSON.stringify(createCommitStatus, null, 2));
-    // save commit status details
-    core.saveState('job-id-num', job.id);
-    core.saveState('commit-status-sha', sha);
-    core.saveState('commit-status-context', commitStatusContext);
 }
 // entrypoint
 try {
-    startup();
+    cleanup();
 }
 catch (error) {
-    core.setFailed(error?.message ?? `Error: ${error}`);
+    core.warning(error?.message ?? `Error: ${error}`);
 }
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=cleanup.js.map
