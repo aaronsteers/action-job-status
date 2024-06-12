@@ -3,7 +3,7 @@ import * as github from '@actions/github'
 import type {components} from '@octokit/openapi-types'
 
 async function wait(ms: number): Promise<void> {
-  new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 // ref: https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28#create-a-commit-status
@@ -23,8 +23,11 @@ function getJobStatus(job: components['schemas']['job']): CommitStatusState {
 
 async function cleanup(): Promise<void> {
   // wait for propagation
-  core.info('Wait 10s for job steps status to propagate to GitHub API')
-  await wait(10 * 1000)
+  const delay = 10
+  core.info(`Wait ${delay}s for job steps status to propagate to GitHub API`)
+  core.debug(new Date().toISOString())
+  await wait(delay * 1000)
+  core.debug(new Date().toISOString())
   // retrieve states
   const jobId = Number(core.getState('job-id-num'))
   const sha = core.getState('commit-status-sha')
