@@ -1,12 +1,18 @@
 name: GitHub workflow job status
 description: Report the job status of a GitHub workflow run to the associated commit
 author: ushuz
+
+branding:
+  icon: check
+  color: gray-dark
+
 inputs:
   commit_sha:
     description: The commit SHA to report the status to
   github_token:
     description: GitHub token
     default: ${{ github.token }}
+
 runs:
   using: node20
   main: dist/index/index.js
