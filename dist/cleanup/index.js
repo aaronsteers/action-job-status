@@ -9681,6 +9681,9 @@ async function wait(ms) {
 // `job.conclusion` cannot be used because this action itself is one step of the job
 // `job.conclusion` is always null while this action is executing
 function getJobStatus(job) {
+    core.startGroup(`Calculate job conclusion from steps`);
+    job.steps?.forEach(step => core.info(`Step "${step.name}": ${step.conclusion}`));
+    core.endGroup();
     if (job.steps?.find(step => step.conclusion === 'failure'))
         return 'failure';
     if (job.steps?.find(step => step.conclusion === 'cancelled'))
@@ -9697,11 +9700,15 @@ async function cleanup() {
     const commitStatusContext = core.getState('commit-status-context');
     // bail out if states are not found
     if (!jobId || !sha || !commitStatusContext) {
-        throw new Error('Error: Cannot find saved states');
+        throw new Error('Cannot retrieve saved states');
     }
+    core.startGroup('Retrieve saved states');
+    core.info(`job-id-num: ${jobId}`);
+    core.info(`commit-status-sha: ${sha}`);
+    core.info(`commit-status-context: ${commitStatusContext}`);
+    core.endGroup();
     // start cleanup
     const context = github.context;
-    core.debug(JSON.stringify(context, null, 2));
     // list jobs for the workflow run
     const octokit = github.getOctokit(core.getInput('github_token'));
     const jobs = await octokit.rest.actions.listJobsForWorkflowRun({
@@ -9711,15 +9718,26 @@ async function cleanup() {
         filter: 'latest',
         per_page: 100
     });
-    core.debug(JSON.stringify(jobs, null, 2));
+    // log fetched jobs
+    core.startGroup(`Find the current job`);
+    core.info(`context.runId: ${context.runId}`);
+    core.info(`context.job: ${context.job}`);
+    core.info(`Jobs:`);
+    jobs.data.jobs.forEach(job => core.info(`  Job ID: ${job.id} Name: ${job.name}`));
+    core.endGroup();
     // find the current job
     const job = jobs.data.jobs.find(j => j.id === jobId);
     // throw error if the job is not found
     if (!job) {
-        throw new Error(`Error: Cannot find job: ${jobId}`);
+        throw new Error(`Cannot find job: ${jobId}`);
     }
     // set commit status
     const state = getJobStatus(job);
+    core.startGroup(`Create commit status`);
+    core.info(`SHA: ${sha}`);
+    core.info(`Context: ${commitStatusContext}`);
+    core.info(`State: ${state}`);
+    core.endGroup();
     const createCommitStatus = await octokit.rest.repos.createCommitStatus({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -9729,9 +9747,10 @@ async function cleanup() {
         target_url: job.html_url ?? undefined
     });
     core.debug(JSON.stringify(createCommitStatus, null, 2));
+    core.info(`Commit status created`);
 }
 // entrypoint
-cleanup().catch(error => core.warning(error.message ?? `Error: ${error}`));
+cleanup().catch(error => core.warning(`Error: ${error.message ?? error}`));
 
 
 /***/ }),

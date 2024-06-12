@@ -9676,7 +9676,6 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 async function startup() {
     const context = github.context;
-    core.debug(JSON.stringify(context, null, 2));
     // list jobs for the workflow run
     const octokit = github.getOctokit(core.getInput('github_token'));
     const jobs = await octokit.rest.actions.listJobsForWorkflowRun({
@@ -9686,14 +9685,20 @@ async function startup() {
         filter: 'latest',
         per_page: 100
     });
-    core.debug(JSON.stringify(jobs, null, 2));
+    // log fetched jobs
+    core.startGroup(`Find the current job`);
+    core.info(`context.runId: ${context.runId}`);
+    core.info(`context.job: ${context.job}`);
+    core.info(`Jobs:`);
+    jobs.data.jobs.forEach(job => core.info(`  Job ID: ${job.id} Name: ${job.name}`));
+    core.endGroup();
     // find the current job
     const job = jobs.data.jobs.find(j => j.name === context.job);
     // throw error if the job is not found
     if (!job) {
-        throw new Error(`Error: Cannot find job: ${context.job}`);
+        throw new Error(`Cannot find job: ${context.job}`);
     }
-    // set commit status to pending
+    // set commit status
     const sha = core.getInput('commit_sha') ||
         context.payload.workflow_run?.head_sha ||
         context.payload.commit?.sha ||
@@ -9703,6 +9708,11 @@ async function startup() {
         : ``;
     const commitStatusContext = `${context.workflow} / ${job.name}${event}`;
     const state = 'pending';
+    core.startGroup(`Create commit status`);
+    core.info(`SHA: ${sha}`);
+    core.info(`Context: ${commitStatusContext}`);
+    core.info(`State: ${state}`);
+    core.endGroup();
     const createCommitStatus = await octokit.rest.repos.createCommitStatus({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -9712,13 +9722,14 @@ async function startup() {
         target_url: job.html_url ?? undefined
     });
     core.debug(JSON.stringify(createCommitStatus, null, 2));
+    core.info(`Commit status created`);
     // save commit status details
     core.saveState('job-id-num', job.id);
     core.saveState('commit-status-sha', sha);
     core.saveState('commit-status-context', commitStatusContext);
 }
 // entrypoint
-startup().catch(error => core.setFailed(error.message ?? `Error: ${error}`));
+startup().catch(error => core.setFailed(`Error: ${error.message ?? error}`));
 
 
 /***/ }),
