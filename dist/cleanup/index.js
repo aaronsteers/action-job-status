@@ -9675,7 +9675,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 async function wait(ms) {
-    new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 // calculate conclusion based on steps
 // `job.conclusion` cannot be used because this action itself is one step of the job
@@ -9692,8 +9692,11 @@ function getJobStatus(job) {
 }
 async function cleanup() {
     // wait for propagation
-    core.info('Wait 10s for job steps status to propagate to GitHub API');
-    await wait(10 * 1000);
+    const delay = 10;
+    core.info(`Wait ${delay}s for job steps status to propagate to GitHub API`);
+    core.debug(new Date().toISOString());
+    await wait(delay * 1000);
+    core.debug(new Date().toISOString());
     // retrieve states
     const jobId = Number(core.getState('job-id-num'));
     const sha = core.getState('commit-status-sha');
