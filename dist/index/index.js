@@ -9690,7 +9690,7 @@ async function startup() {
     core.info(`context.runId: ${context.runId}`);
     core.info(`context.job: ${context.job}`);
     core.info(`Jobs:`);
-    jobs.data.jobs.forEach(job => core.info(`  Job ID: ${job.id} Name: ${job.name}`));
+    jobs.data.jobs.forEach(job => core.info(`  Job ${job.id}: ${job.name}`));
     core.endGroup();
     // find the current job
     const job = jobs.data.jobs.find(j => j.name === context.job);
