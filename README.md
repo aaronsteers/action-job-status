@@ -1,4 +1,4 @@
-# action-job-status
+# `action-job-status`: GitHub Workflow Job Status
 
 ![demo](https://user-images.githubusercontent.com/3797062/89281009-6367de00-d684-11ea-9775-82d2e7c15c42.png)
 

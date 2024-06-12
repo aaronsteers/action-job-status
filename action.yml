@@ -1,4 +1,4 @@
-name: GitHub workflow job status
+name: GitHub Workflow Job Status
 description: Report the job status of a GitHub workflow run to the associated commit
 author: ushuz
 
