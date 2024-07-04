@@ -27,13 +27,13 @@ async function startup(): Promise<void> {
   }
   // set commit status
   const sha =
-  core.getInput('commit_sha') ||
-  context.payload.workflow_run?.head_sha ||
-  context.payload.commit?.sha ||
-  context.sha
+    core.getInput('commit_sha') ||
+    context.payload.workflow_run?.head_sha ||
+    context.payload.commit?.sha ||
+    context.sha
   const event = context.payload.workflow_run
-  ? ` (${context.payload.workflow_run.event} → ${context.eventName})`
-  : ``
+    ? ` (${context.payload.workflow_run.event} → ${context.eventName})`
+    : ``
   const commitStatusContext = `${context.workflow} / ${job.name}${event}`
   const state = 'pending'
   core.startGroup(`Create commit status`)
