@@ -12,18 +12,31 @@ async function startup(): Promise<void> {
     filter: 'latest',
     per_page: 100
   })
-  // log fetched jobs
+  // log context
   core.startGroup(`Find the current job`)
   core.info(`context.runId: ${context.runId}`)
   core.info(`context.job: ${context.job}`)
+  // append matrix label if any
+  let currentJob = context.job
+  const matrixLabel = core.getInput('matrix_label')
+  if (matrixLabel) {
+    currentJob = `${currentJob} (${matrixLabel})`
+    core.info(`context.job (matrix-label): ${currentJob}`)
+  }
+  // log strategy job index if any
+  const jobIndex = core.getInput('job_index')
+  if (jobIndex) {
+    core.info(`strategy.job-index: ${jobIndex}`)
+  }
+  // list fetched jobs
   core.info(`Jobs:`)
   jobs.data.jobs.forEach(job => core.info(`  Job ${job.id}: ${job.name}`))
   core.endGroup()
   // find the current job
-  const job = jobs.data.jobs.find(j => j.name === context.job)
+  const job = jobs.data.jobs.find(j => j.name === currentJob)
   // throw error if the job is not found
   if (!job) {
-    throw new Error(`Cannot find job: ${context.job}`)
+    throw new Error(`Cannot find job: ${currentJob}`)
   }
   // set commit status
   const sha =
