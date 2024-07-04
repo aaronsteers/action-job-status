@@ -7,33 +7,32 @@ on:
     - completed
 
 jobs:
-  # test-matrix-success:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       node_group:
-  #         - "1"
-  #         - "2"
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./
-  #       with:
-  #         matrix_name: ${{ matrix.node_group }}
-  #     - run: exit 0
+  test-matrix-success:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        region: [ us-east-1, us-west-1 ]
+        service: [ svc-a, svc-b ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          matrix_label: "${{ matrix.region }}, ${{ matrix.service }}"
+      - run: exit 0
 
-  # test-matrix-failure:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       node_group:
-  #         - "1"
-  #         - "2"
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./
-  #       with:
-  #         matrix_name: ${{ matrix.node_group }}
-  #     - run: exit 1
+  test-matrix-failure:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [ us-east-1, us-west-1 ]
+        service: [ svc-a, svc-b ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          matrix_label: "${{ matrix.region }}, ${{ matrix.service }}"
+      - run: exit 1
 
   test-success:
     runs-on: ubuntu-latest
