@@ -18,15 +18,10 @@ async function startup(): Promise<void> {
   core.info(`context.job: ${context.job}`)
   // append matrix label if any
   let currentJob = context.job
-  const matrixLabel = core.getInput('matrix_label')
-  if (matrixLabel) {
-    currentJob = `${currentJob} (${matrixLabel})`
-    core.info(`context.job (matrix-label): ${currentJob}`)
-  }
-  // log strategy job index if any
-  const jobIndex = core.getInput('job_index')
-  if (jobIndex) {
-    core.info(`strategy.job-index: ${jobIndex}`)
+  const jobName = core.getInput('job_name');
+  if (jobName) {
+      currentJob = `${jobName}`;
+      core.info(`jobName: ${jobName}`);
   }
   // list fetched jobs
   core.info(`Jobs:`)

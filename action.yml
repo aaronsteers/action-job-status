@@ -12,11 +12,9 @@ inputs:
   github_token:
     description: GitHub token
     default: ${{ github.token }}
-  job_index:
-    description: The index of the matrix job in a strategy
-    default: ${{ strategy.job-index }}
-  matrix_label:
-    description: The label of the matrix job
+  job_name:
+    description: The name of the matrix job
+    default: ${{  }}
 
 runs:
   using: node20
